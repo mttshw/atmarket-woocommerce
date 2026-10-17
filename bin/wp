@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# WP-CLI on PHP 8.3 against the local test shop in dev/wordpress.
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
+exec /opt/homebrew/opt/php@8.3/bin/php -d memory_limit=512M "$(ls /opt/homebrew/Cellar/wp-cli/*/bin/wp | tail -1)" --path="$DIR/dev/wordpress" "$@"

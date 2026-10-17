@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Creates a local test shop in dev/: WordPress + WooCommerce on SQLite, with
+# this plugin linked in. Needs PHP 8.3 and WP-CLI (brew install php@8.3 wp-cli).
+# Log in at http://localhost:8090/wp-admin as admin / admin.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+WP="$ROOT/bin/wp"
+W="$ROOT/dev/wordpress"
+mkdir -p "$ROOT/dev"
+
+"$WP" core download --quiet
+"$WP" config create --dbname=wp --dbuser=x --dbpass=x --skip-check --quiet
+tmp=$(mktemp -d)
+curl -fsSL -o "$tmp/sqlite.zip" https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip
+unzip -q -o "$tmp/sqlite.zip" -d "$W/wp-content/plugins/"
+cp "$W/wp-content/plugins/sqlite-database-integration/db.copy" "$W/wp-content/db.php"
+sed -i.bak "s#{SQLITE_IMPLEMENTATION_FOLDER_PATH}#$W/wp-content/plugins/sqlite-database-integration#; s#{SQLITE_PLUGIN}#sqlite-database-integration/load.php#" "$W/wp-content/db.php"
+"$WP" core install --url=http://localhost:8090 --title="Test Shop" --admin_user=admin --admin_password=admin --admin_email=admin@example.com --skip-email --quiet
+"$WP" plugin install woocommerce --activate --quiet
+ln -sfn "$ROOT" "$W/wp-content/plugins/atproto-for-woocommerce"
+"$WP" plugin activate atproto-for-woocommerce --quiet
+echo "Ready: http://localhost:8090/wp-admin (admin / admin)"

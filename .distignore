@@ -1,0 +1,13 @@
+/.git
+/.github
+/bin
+/dev
+/tests
+/vendor
+/.phpunit.cache
+/.distignore
+/.gitignore
+/composer.json
+/composer.lock
+/phpunit.xml
+/README.md
