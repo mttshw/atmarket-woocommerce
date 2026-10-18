@@ -16,3 +16,22 @@ jobs:
       - name: Lint
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l > /dev/null
       - run: vendor/bin/phpunit
+
+  # Checks the records the plugin publishes with the shared conformance
+  # checker. Needs @atmarket/commerce-lexicons on npm: set the repository
+  # variable COMMERCE_CHECK to "on" once it is published.
+  conformance:
+    if: vars.COMMERCE_CHECK == 'on'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: openssl, sodium, mbstring
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: composer install --no-interaction --no-progress
+      - run: ATPWC_CONFORMANCE_OUT=build/records.json vendor/bin/phpunit --filter ConformanceFixtureTest
+      - run: npx --yes -p @atmarket/commerce-lexicons commerce-check --file build/records.json

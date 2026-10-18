@@ -1,3 +1,4 @@
 /vendor/
 /dev/
 /.phpunit.cache/
+/build/
